@@ -1,15 +1,17 @@
+import {reverseGeocode} from "@/libs/geocode";
 import {HTMLAttributes} from "react";
 
 type Props = HTMLAttributes<HTMLDivElement> & {
   location: number[];
 };
 
-export default function LocationMap({location, ...divProps}:Props) {
+export default async function LocationMap({location, ...divProps}:Props) {
   const [lng, lat] = location;
   const osmUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=14/${lat}/${lng}`;
+  const label = await reverseGeocode(lat, lng).catch(() => `${lat.toFixed(3)}, ${lng.toFixed(3)}`);
   return (
     <div {...divProps}>
-      <p className="text-sm">Lat: {lat.toFixed(5)}, Lng: {lng.toFixed(5)}</p>
+      <p className="text-sm">{label}</p>
       <a
         href={osmUrl}
         target="_blank"

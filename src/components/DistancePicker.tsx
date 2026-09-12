@@ -1,4 +1,5 @@
 import {Location} from "@/components/LocationPicker";
+import {useReverseGeocode} from "@/libs/useReverseGeocode";
 import {useEffect, useState} from "react";
 
 export default function DistancePicker({
@@ -11,6 +12,7 @@ export default function DistancePicker({
   const [radius, setRadius] = useState(defaultRadius);
   const [center, setCenter] = useState<Location|null>(null);
   const [geoError, setGeoError] = useState('');
+  const {label, loading} = useReverseGeocode(center?.lat, center?.lng);
 
   useEffect(() => {
     if (window.localStorage && window.localStorage.getItem('center')) {
@@ -66,6 +68,11 @@ export default function DistancePicker({
             placeholder="Longitude"
           />
         </div>
+      )}
+      {center && (
+        <p className="text-xs text-gray-500">
+          {loading ? 'Resolving location...' : label}
+        </p>
       )}
       <label>Distance: {Math.round(radius / 1000)} km</label>
       <input
