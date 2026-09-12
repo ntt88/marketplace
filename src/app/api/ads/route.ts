@@ -28,7 +28,7 @@ export async function GET(req: Request, res: Response) {
   if (min && max) filter.price = {$gte: min, $lte: max};
 
   if (radius && center) {
-    const coords = center.split('-');
+    const coords = center.split(',');
     const lat = parseFloat(coords[0]);
     const lng = parseFloat(coords[1]);
     aggregationSteps.push(
@@ -51,8 +51,13 @@ export async function GET(req: Request, res: Response) {
     $sort: {createdAt:-1},
   });
 
-  const adsDocs = await AdModel.aggregate(aggregationSteps);
-  return Response.json(adsDocs);
+  try {
+    const adsDocs = await AdModel.aggregate(aggregationSteps);
+    return Response.json(adsDocs);
+  } catch (err) {
+    console.error(err);
+    return Response.json({error: 'Failed to search ads'}, {status: 500});
+  }
 }
 
 export async function DELETE(req: Request) {

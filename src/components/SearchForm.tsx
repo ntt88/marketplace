@@ -60,7 +60,7 @@ export default function SearchForm({action}: Props){
       </div>
       <div>
         <input type="hidden" name="radius" value={radius}/>
-        <input type="hidden" name="center" value={center?.lat + '-' + center?.lng}/>
+        <input type="hidden" name="center" value={center?.lat + ',' + center?.lng}/>
         <DistancePicker
           defaultRadius={defaultRadius}
           onChange={({radius, center}) => {
