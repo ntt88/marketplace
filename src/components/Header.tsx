@@ -1,9 +1,8 @@
 'use client';
-import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faUserCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Session} from "next-auth";
-import {signIn, signOut} from "next-auth/react";
-import Image from "next/image";
+import {signOut} from "next-auth/react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
@@ -26,21 +25,21 @@ export default function Header({session}:{session:Session|null}) {
         <span className="border-r"></span>
         {!session?.user && (
           <>
-            <button className="border-0 text-gray-600">Sign up</button>
-            <button
-              onClick={() => signIn('google')}
+            <Link href="/register" className="border-0 text-gray-600">Sign up</Link>
+            <Link
+              href="/login"
               className="bg-blue-600 text-white border-0 px-6 py-1">
               Login
-            </button>
+            </Link>
           </>
         )}
         {session?.user && (
           <>
             <div className="relative flex items-center">
               <button onClick={() => setShowDropdown(prev => !prev)}>
-                <Image
-                  src={session.user.image as string} alt={'avatar'} width={36} height={36}
-                  className={"rounded-md relative "+(showDropdown?'z-50':'')}
+                <FontAwesomeIcon
+                  icon={faUserCircle}
+                  className={"text-3xl text-gray-600 relative "+(showDropdown?'z-50':'')}
                 />
               </button>
               {showDropdown && (
