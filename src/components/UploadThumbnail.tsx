@@ -1,9 +1,9 @@
 import MyImage from "@/components/MyImage";
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
+import {UploadedFile} from "@/libs/types";
 import React from "react";
 
 type Props = {
-  file:UploadResponse;
+  file:UploadedFile;
   onClick?: () => void;
 }
 

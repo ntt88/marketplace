@@ -2,12 +2,12 @@ import Uploader from "@/components/Uploader";
 import UploadThumbnail from "@/components/UploadThumbnail";
 import {faImage, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
+import {UploadedFile} from "@/libs/types";
 import {Dispatch, SetStateAction, useState} from "react";
 
 type Props = {
-  files: UploadResponse[];
-  setFiles: Dispatch<SetStateAction<UploadResponse[]>>;
+  files: UploadedFile[];
+  setFiles: Dispatch<SetStateAction<UploadedFile[]>>;
 };
 
 export default function UploadArea({files,setFiles}:Props) {

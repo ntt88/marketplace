@@ -1,7 +1,7 @@
 import MyImage from "@/components/MyImage";
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
+import {UploadedFile} from "@/libs/types";
 
-export default function UploadView({file}:{file:UploadResponse}) {
+export default function UploadView({file}:{file:UploadedFile}) {
   if (file.fileType === 'image') {
     return (
       <MyImage

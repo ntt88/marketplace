@@ -1,20 +1,36 @@
 'use client';
-import {IKContext, IKUpload} from "imagekitio-react";
-import {IKUploadProps} from "imagekitio-react/src/components/IKUpload/props";
+import {UploadedFile} from "@/libs/types";
+import {ChangeEvent} from "react";
 
-export default function Uploader(props:IKUploadProps) {
+type Props = {
+  onUploadStart?: () => void;
+  onSuccess: (file: UploadedFile) => void;
+  onError?: (error: unknown) => void;
+};
+
+export default function Uploader({onUploadStart, onSuccess, onError}: Props) {
+  async function handleChange(ev: ChangeEvent<HTMLInputElement>) {
+    const file = ev.target.files?.[0];
+    ev.target.value = '';
+    if (!file) {
+      return;
+    }
+    onUploadStart?.();
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('/api/upload', {method: 'POST', body: formData});
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      const uploadedFile: UploadedFile = await response.json();
+      onSuccess(uploadedFile);
+    } catch (err) {
+      onError?.(err);
+    }
+  }
+
   return (
-    <>
-      <IKContext
-        urlEndpoint={process.env.NEXT_PUBLIC_IK_ENDPOINT}
-        publicKey={process.env.NEXT_PUBLIC_IK_PUBLIC_KEY}
-        authenticator={async () => {
-          const response = await fetch('/api/imagekit/auth');
-          return await response.json();
-        }}
-      >
-        <IKUpload {...props} />
-      </IKContext>
-    </>
+    <input type="file" accept="image/*" onChange={handleChange} />
   );
 }

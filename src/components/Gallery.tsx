@@ -4,11 +4,11 @@ import UploadThumbnail from "@/components/UploadThumbnail";
 import UploadView from "@/components/UploadView";
 import {faChevronLeft, faChevronRight} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
+import {UploadedFile} from "@/libs/types";
 import {useState} from "react";
 
-export default function Gallery({files}:{files:UploadResponse[]}) {
-  const [activeFile, setActiveFile] = useState<UploadResponse | null>(files?.[0] || null);
+export default function Gallery({files}:{files:UploadedFile[]}) {
+  const [activeFile, setActiveFile] = useState<UploadedFile | null>(files?.[0] || null);
   function next() {
     const activeFileIndex = files.findIndex(f => f.fileId === activeFile?.fileId);
     const nextIndex = activeFileIndex === files.length - 1 ? 0 : activeFileIndex + 1;

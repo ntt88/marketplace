@@ -4,15 +4,15 @@ import AdTextInputs, {AdTexts} from "@/components/AdTextInputs";
 import LocationPicker, {Location} from "@/components/LocationPicker";
 import SubmitButton from "@/components/SubmitButton";
 import UploadArea from "@/components/UploadArea";
+import {UploadedFile} from "@/libs/types";
 import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
 import {redirect} from "next/navigation";
 import {useState} from "react";
 
 type Props = {
   id?: string | null;
-  defaultFiles?: UploadResponse[];
+  defaultFiles?: UploadedFile[];
   defaultLocation: Location;
   defaultTexts?: AdTexts;
 };
@@ -23,7 +23,7 @@ export default function AdForm({
   defaultLocation,
   defaultTexts={},
 }:Props) {
-  const [files, setFiles] = useState<UploadResponse[]>(defaultFiles);
+  const [files, setFiles] = useState<UploadedFile[]>(defaultFiles);
   const [location, setLocation] = useState<Location>(defaultLocation);
   const [gpsCoords, setGpsCoords] = useState<Location|null>(null);
 

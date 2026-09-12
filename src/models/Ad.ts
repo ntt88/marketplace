@@ -1,4 +1,4 @@
-import {UploadResponse} from "imagekit/dist/libs/interfaces";
+import {UploadedFile} from "@/libs/types";
 import {Model, model, models, Schema} from "mongoose";
 
 export type Ad = {
@@ -8,7 +8,7 @@ export type Ad = {
   category: string;
   description: string;
   contact: string;
-  files: UploadResponse[];
+  files: UploadedFile[];
   location: {
     type: string;
     coordinates: number[];
