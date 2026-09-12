@@ -1,6 +1,5 @@
 import {Location} from "@/components/LocationPicker";
-import {Loader} from "@googlemaps/js-api-loader";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 
 export default function DistancePicker({
   onChange,
@@ -11,96 +10,72 @@ export default function DistancePicker({
 }) {
   const [radius, setRadius] = useState(defaultRadius);
   const [center, setCenter] = useState<Location|null>(null);
-  const [zoom, setZoom] = useState<number>(7);
   const [geoError, setGeoError] = useState('');
-  const mapsDiv = useRef<HTMLDivElement|null>(null);
 
   useEffect(() => {
-    if (center) {
-      loadMap();
-      if (window && window.localStorage) {
-        window.localStorage.setItem('center', JSON.stringify(center));
-      }
+    if (window.localStorage && window.localStorage.getItem('center')) {
+      try {
+        setCenter(JSON.parse(window.localStorage.getItem('center') as string));
+      } catch {}
     }
-    if (!center) {
-      if (window && window.localStorage && window.localStorage.getItem('center')) {
-        const centerFromLS = window.localStorage.getItem('center') || '';
-        setCenter(JSON.parse(centerFromLS));
-      }
-    }
-  }, [center]);
-
-  useEffect(() => {
-    if (center && radius) {
-      onChange({center,radius});
-    }
-  }, [radius,center]);
-
-  useEffect(() => {
     navigator.geolocation.getCurrentPosition(ev => {
-      setCenter({lat:ev.coords.latitude, lng:ev.coords.longitude});
+      const newCenter = {lat: ev.coords.latitude, lng: ev.coords.longitude};
+      setCenter(newCenter);
+      window.localStorage?.setItem('center', JSON.stringify(newCenter));
     }, err => setGeoError(err.message));
   }, []);
 
-  async function loadMap() {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_MAPS_KEY as string,
-    });
-    const Core = await loader.importLibrary('core');
-    const {Map, Circle} = await loader.importLibrary('maps');
-    const map = new Map(mapsDiv.current as HTMLDivElement, {
-      mapId: 'map',
-      center: center,
-      zoom: zoom,
-      mapTypeControl: false,
-      streetViewControl: false,
-      zoomControl: true,
-    });
-    const circle = new Circle({
-      map,
-      strokeColor: "#FF0000",
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: "#FF0000",
-      fillOpacity: 0.35,
-      center: center,
-      radius,
-      editable: true,
-    });
-    Core.event.addListener(circle, 'bounds_changed', () => {
-      const radius = circle.getRadius();
-      setRadius(radius);
-      if (radius > 1500000) map.setZoom(1);
-      else if (radius > 800000) map.setZoom(2);
-      else if (radius > 400000) map.setZoom(3);
-      else if (radius > 180000) map.setZoom(4);
-      else if (radius > 100000) map.setZoom(5);
-      else if (radius > 50000) map.setZoom(6);
-      else if (radius > 25000) map.setZoom(7);
-      else if (radius > 11000) map.setZoom(8);
-      else if (radius > 5000) map.setZoom(9);
-      else if (radius <= 10000) map.setZoom(10);
-      setZoom(map.getZoom() as number);
-    });
-    Core.event.addListener(circle, 'center_changed', () => {
-      const circleCenter:Location|undefined = circle.getCenter()?.toJSON();
-      if (circleCenter) {
-        setCenter(circleCenter);
-        map.setCenter(circleCenter);
-      }
-    });
+  useEffect(() => {
+    if (center && radius) {
+      onChange({center, radius});
+    }
+  }, [radius, center]);
+
+  function handleCenterChange(key: 'lat'|'lng', value: string) {
+    const num = parseFloat(value);
+    if (isNaN(num) || !center) return;
+    const newCenter = {...center, [key]: num};
+    setCenter(newCenter);
+    window.localStorage?.setItem('center', JSON.stringify(newCenter));
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <label>Where</label>
-      <div ref={mapsDiv} className="w-full h-48 bg-gray-200">
-        {(!center || geoError) && (
-          <div className="text-gray-400 p-4">
-            {geoError || 'Loading map....'}
-          </div>
-        )}
-      </div>
-    </>
+      {!center && (
+        <div className="text-gray-400 text-sm bg-gray-200 rounded p-4">
+          {geoError ? `Location error: ${geoError}` : 'Detecting your location...'}
+        </div>
+      )}
+      {center && (
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="number"
+            step="any"
+            value={center.lat}
+            onChange={ev => handleCenterChange('lat', ev.target.value)}
+            className="border rounded p-2 text-sm"
+            placeholder="Latitude"
+          />
+          <input
+            type="number"
+            step="any"
+            value={center.lng}
+            onChange={ev => handleCenterChange('lng', ev.target.value)}
+            className="border rounded p-2 text-sm"
+            placeholder="Longitude"
+          />
+        </div>
+      )}
+      <label>Distance: {Math.round(radius / 1000)} km</label>
+      <input
+        type="range"
+        min={1000}
+        max={200000}
+        step={1000}
+        value={radius}
+        onChange={ev => setRadius(parseInt(ev.target.value))}
+      />
+    </div>
   );
 }

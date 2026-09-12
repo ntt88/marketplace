@@ -1,6 +1,5 @@
-'use effect';
-import {createRef, useEffect} from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+'use client';
+import {useEffect, useState} from "react";
 
 export type Location = {
   lat: number;
@@ -16,40 +15,43 @@ export default function LocationPicker({
   onChange: (location: Location) => void;
   gpsCoords: Location|null;
 }) {
-  const divRef = createRef<HTMLDivElement>();
-
-  async function loadMap() {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_MAPS_KEY as string,
-    });
-    const {Map} = await loader.importLibrary('maps');
-    const {AdvancedMarkerElement} = await loader.importLibrary('marker');
-    const map = new Map(divRef.current as HTMLDivElement, {
-      mapId: 'map',
-      center: defaultLocation,
-      zoom: 6,
-      mapTypeControl: false,
-      streetViewControl: false,
-    });
-    const pin = new AdvancedMarkerElement({
-      map,
-      position: defaultLocation,
-    });
-    map.addListener('click', (ev:any) => {
-      pin.position = ev.latLng;
-      const lat = ev.latLng.lat();
-      const lng = ev.latLng.lng();
-      onChange({lat, lng});
-    });
-  }
+  const [location, setLocation] = useState<Location>(defaultLocation);
 
   useEffect(() => {
-    loadMap();
+    if (gpsCoords) {
+      setLocation(gpsCoords);
+    }
   }, [gpsCoords]);
 
+  function handleChange(key: 'lat'|'lng', value: string) {
+    const num = parseFloat(value);
+    const newLocation = {...location, [key]: isNaN(num) ? 0 : num};
+    setLocation(newLocation);
+    onChange(newLocation);
+  }
+
   return (
-    <>
-      <div ref={divRef} id="map" className="w-full h-[200px]"></div>
-    </>
+    <div className="grid grid-cols-2 gap-4 p-4">
+      <div>
+        <label className="block text-xs text-gray-500 mb-1">Latitude</label>
+        <input
+          type="number"
+          step="any"
+          value={location.lat}
+          onChange={ev => handleChange('lat', ev.target.value)}
+          className="border rounded p-2 w-full text-gray-800"
+        />
+      </div>
+      <div>
+        <label className="block text-xs text-gray-500 mb-1">Longitude</label>
+        <input
+          type="number"
+          step="any"
+          value={location.lng}
+          onChange={ev => handleChange('lng', ev.target.value)}
+          className="border rounded p-2 w-full text-gray-800"
+        />
+      </div>
+    </div>
   );
 }
